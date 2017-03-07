@@ -15,9 +15,10 @@ typedef struct _tree_t_
 } tree_t;
 
 typedef enum _traversal_t_ {
-    IN_ORDER,  // Left - Root - Right
-    PRE_ORDER, // Root - Left - Right
-    POST_ORDER // Left - Right - Root
+    IN_ORDER,   // Left - Root - Right
+    PRE_ORDER,  // Root - Left - Right
+    POST_ORDER, // Left - Right - Root
+    LEVEL_ORDER
 } traversal_t;
 
 ////////////////// --------- Helper Functions --------- //////////////////
@@ -115,6 +116,30 @@ tree_t *delete (tree_t *root, int value)
     }
     return root;
 }
+int getMaxLevel(tree_t *root)
+{
+    if (!root)
+        return 0;
+
+    int leftLevel = getMaxLevel(root->left);
+    int rightLevel = getMaxLevel(root->right);
+
+    if (leftLevel > rightLevel)
+        return leftLevel + 1;
+    return rightLevel + 1;
+}
+void levelOrderUtil(tree_t *root, int level)
+{
+    if (!root)
+        return;
+    if (level == 1)
+        printf("%d \n", root->value);
+    else
+    {
+        levelOrderUtil(root->left, level - 1);
+        levelOrderUtil(root->right, level - 1);
+    }
+}
 void leftProjectionUtil(tree_t *root, int level, int *max_level)
 {
     if (!root)
@@ -122,7 +147,7 @@ void leftProjectionUtil(tree_t *root, int level, int *max_level)
 
     if (*max_level < level)
     {
-        printf("%d ", root->value);
+        printf("%d \n", root->value);
         *max_level = level;
     }
 
@@ -133,7 +158,6 @@ void leftProjection(tree_t *root)
 {
     int max_level = 0;
     leftProjectionUtil(root, 1, &max_level);
-    printf("\n");
 }
 void print_tree(tree_t *root, traversal_t traverse_method)
 {
@@ -142,30 +166,40 @@ void print_tree(tree_t *root, traversal_t traverse_method)
 
     switch (traverse_method)
     {
-    case IN_ORDER:
-    {
-        print_tree(root->left, IN_ORDER);
-        printf("%d \n", root->value);
-        print_tree(root->right, IN_ORDER);
-        break;
-    }
-    case PRE_ORDER:
-    {
-        printf("%d \n", root->value);
-        print_tree(root->left, PRE_ORDER);
-        print_tree(root->right, PRE_ORDER);
-        break;
-    }
-    case POST_ORDER:
-    {
-        print_tree(root->left, POST_ORDER);
-        print_tree(root->right, POST_ORDER);
-        printf("%d \n", root->value);
-        break;
-    }
-    default:
-        printf("Invalid traverse_method");
-        break;
+        case IN_ORDER:
+        {
+            print_tree(root->left, IN_ORDER);
+            printf("%d \n", root->value);
+            print_tree(root->right, IN_ORDER);
+            break;
+        }
+        case PRE_ORDER:
+        {
+            printf("%d \n", root->value);
+            print_tree(root->left, PRE_ORDER);
+            print_tree(root->right, PRE_ORDER);
+            break;
+        }
+        case POST_ORDER:
+        {
+            print_tree(root->left, POST_ORDER);
+            print_tree(root->right, POST_ORDER);
+            printf("%d \n", root->value);
+            break;
+        }
+        case LEVEL_ORDER:
+        {
+            int level = 0;
+            int maxLevel = getMaxLevel(root);
+            for (level = 1; level <= maxLevel; level++)
+                levelOrderUtil(root, level);
+            break;
+        }
+        default:
+        {
+            printf("Invalid traverse_method\n");
+            break;
+        }
     }
 }
 int main(int argc, char *argv[])
@@ -184,6 +218,8 @@ int main(int argc, char *argv[])
     print_tree(root, PRE_ORDER);
     printf("---- Tree in (POST_ORDER) ----\n");
     print_tree(root, POST_ORDER);
+    printf("---- Tree in (LEVEL_ORDER) ----\n");
+    print_tree(root, LEVEL_ORDER);
 
     tree_t *query = search(root, 30);
     printf("query node for value 30: {.left:%p, .right: %p, .root: %p, .value: %d }\n", query->left, query->right, query, query->value);
