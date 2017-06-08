@@ -67,7 +67,16 @@ tree_t *search(tree_t *root, int value)
     else
         return NULL;
 }
-tree_t *delete (tree_t *root, int value)
+void delete_tree(tree_t *root)
+{
+    if (!root) return;
+    delete_tree(root->left);
+    delete_tree(root->right);
+    printf("Deleting node %d\n", root->value);
+    free(root);
+    root = NULL;
+}
+tree_t *delete_node (tree_t *root, int value)
 {
     if (!root)
         return root;
@@ -90,9 +99,9 @@ tree_t *delete (tree_t *root, int value)
     }
 
     if (value < root->value)
-        root->left = delete (root->left, value);
+        root->left = delete_node(root->left, value);
     else if (value > root->value)
-        root->right = delete (root->right, value);
+        root->right = delete_node(root->right, value);
     else
     {
         if (!root->left)
@@ -112,7 +121,7 @@ tree_t *delete (tree_t *root, int value)
 
         tree_t *temp = minValNode(root->right);
         root->value = temp->value;
-        root->right = delete (root->right, temp->value);
+        root->right = delete_node(root->right, temp->value);
     }
     return root;
 }
@@ -166,40 +175,40 @@ void print_tree(tree_t *root, traversal_t traverse_method)
 
     switch (traverse_method)
     {
-        case IN_ORDER:
-        {
-            print_tree(root->left, IN_ORDER);
-            printf("%d \n", root->value);
-            print_tree(root->right, IN_ORDER);
-            break;
-        }
-        case PRE_ORDER:
-        {
-            printf("%d \n", root->value);
-            print_tree(root->left, PRE_ORDER);
-            print_tree(root->right, PRE_ORDER);
-            break;
-        }
-        case POST_ORDER:
-        {
-            print_tree(root->left, POST_ORDER);
-            print_tree(root->right, POST_ORDER);
-            printf("%d \n", root->value);
-            break;
-        }
-        case LEVEL_ORDER:
-        {
-            int level = 0;
-            int maxLevel = getMaxLevel(root);
-            for (level = 1; level <= maxLevel; level++)
-                levelOrderUtil(root, level);
-            break;
-        }
-        default:
-        {
-            printf("Invalid traverse_method\n");
-            break;
-        }
+    case IN_ORDER:
+    {
+        print_tree(root->left, IN_ORDER);
+        printf("%d \n", root->value);
+        print_tree(root->right, IN_ORDER);
+        break;
+    }
+    case PRE_ORDER:
+    {
+        printf("%d \n", root->value);
+        print_tree(root->left, PRE_ORDER);
+        print_tree(root->right, PRE_ORDER);
+        break;
+    }
+    case POST_ORDER:
+    {
+        print_tree(root->left, POST_ORDER);
+        print_tree(root->right, POST_ORDER);
+        printf("%d \n", root->value);
+        break;
+    }
+    case LEVEL_ORDER:
+    {
+        int level = 0;
+        int maxLevel = getMaxLevel(root);
+        for (level = 1; level <= maxLevel; level++)
+            levelOrderUtil(root, level);
+        break;
+    }
+    default:
+    {
+        printf("Invalid traverse_method\n");
+        break;
+    }
     }
 }
 int main(int argc, char *argv[])
@@ -227,14 +236,14 @@ int main(int argc, char *argv[])
     printf("--- Left Projection --- \n");
     leftProjection(root);
 
-    delete (root, 60);
-    delete (root, 50);
-    delete (root, 40);
-    delete (root, 30);
-    delete (root, 10);
-    delete (root, 20);
+    delete_node(root, 60);
+    delete_node(root, 50);
+    delete_node(root, 40);
+    delete_node(root, 30);
+    delete_node(root, 20);
     printf("---- After Deletion ----\n");
     print_tree(root, IN_ORDER);
+    delete_tree(root);
 
     return 0;
 }
